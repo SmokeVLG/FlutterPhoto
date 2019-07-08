@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:image/image.dart' as DartImage;
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
-
+import 'package:fluttertoast/fluttertoast.dart';
 //Список доступных камер на устройстве
 List<CameraDescription> cameras;
 final LINE_BREAK_CODE = 10;
@@ -16,8 +16,6 @@ final LINE_BREAK_CODE = 10;
 Future<void> main() async {
   // Получить список доступных камер на устройстве.
   cameras = await availableCameras();
-
-  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -139,10 +137,12 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
   Future _takePicture(String pathJpeg) async {
     // Create an image
-    debugPrint("decodeImage");
+    showMessage("Изменение формата изображения.");
+    debugPrint("Изменение формата изображения.");
     DartImage.Image image =
     DartImage.decodeImage(File(pathJpeg).readAsBytesSync());
-    debugPrint("resizeImage");
+    showMessage("Изменение размера изображения.");
+    debugPrint("Изменение размера изображения.");
     DartImage.Image newImage;
     //2mp = 1920(Width ) на 1080 (height)
     if (!image.exif.hasOrientation || image.exif.orientation > 4) {
@@ -150,8 +150,8 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     } else {
       newImage = DartImage.copyResize(image, width: 1920);
     }
-
-    debugPrint("drawString");
+    showMessage("Добавление штампа в изображение.");
+    debugPrint("Добавление штампа в изображение.");
     //Цвет задается в RGB формате
     int rectangleColor = DartImage.getColor(255, 0, 0);
     int textColor = DartImage.getColor(0, 0, 0);
@@ -174,8 +174,13 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     drawString(newImage, bitmapFont, 10, 10, printText, color: textColor);
 
     var encodeJpg = DartImage.encodeJpg(newImage, quality: 80);
-    debugPrint("writeAsBytesSync");
+    showMessage("Сохранение изображения.");
+    debugPrint("Сохранение изображения");
     File(pathJpeg).writeAsBytesSync(encodeJpg);
+  }
+
+  void showMessage(String msg) {
+      Fluttertoast.showToast(msg: msg,gravity: ToastGravity.CENTER,fontSize:16.0,toastLength: Toast.LENGTH_SHORT);
   }
 
   DartImage.Image drawString(DartImage.Image image, DartImage.BitmapFont font,
